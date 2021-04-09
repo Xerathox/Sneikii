@@ -1,7 +1,7 @@
 import numpy as np
-import random
+import random as rnd
 
-rand = random.Random()
+rand = rnd.Random()
 
 class SnakeGame():
 	def __init__(self, height=15, width=15):
@@ -242,11 +242,8 @@ class SnakeGame():
 
 ## MAIN
 				
-
-
-
 game = SnakeGame(15,30)
-while(game.game_state):
+while game.game_state:
 	print(game)
 
 	### Mover Manualmente
