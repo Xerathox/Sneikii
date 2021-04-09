@@ -1,0 +1,2 @@
+# Sneikii
+Proyecto de IA 
