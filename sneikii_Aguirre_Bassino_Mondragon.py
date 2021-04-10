@@ -158,7 +158,7 @@ class sneikii():
 			return rand.choice(moves)
 
 	def heuristica(self, head):
-		# distancia Manhattan
+		# distancia Manhattan/Euclidiana
 		d0 = self.food[0] - head[0]
 		d1 = self.food[1] - head[1]
 		return np.sqrt(d0**2 + d1**2)
