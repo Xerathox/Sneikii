@@ -1,5 +1,4 @@
-from snake_game_AI import SnakeGameAI
-#from snake_game_GUI import SnakeGameGUI
+from snake_game_GUI import SnakeGameGUI
 import pygame
 import time
 import random
@@ -7,304 +6,213 @@ import numpy as np
 
 rand = random.Random()
 
-class SnakeGame():
+class SnakeGameAStar(SnakeGameGUI):
     
-	def __init__(self, height=15, width=15):
-		self.game_state = True # False cuando es Game Over
-		self.height = height
-		self.width = width
-		self.size = [self.height, self.width]
-		self.board = np.zeros(self.size)
-		self.score = 0
-		self.head = [self.height//2, self.width//2]  
-		self.direccion = rand.choice([[0, 1], [0, -1], [1, 0], [-1, 0]])
-		self.snake = [[self.head[0] - i*self.direccion[0], self.head[1] - i*self.direccion[1]] for i in range(3)]
-		for s in self.snake:
-			self.board[s[0], s[1]] = 1
-		self.board[self.head[0], self.head[1]] = 2
-		self.food = self.comida_aleatoria()
-		self.board[self.food[0], self.food[1]] = -1
-		
-		self.reverse = None
+    def __init__(self, headless_mode = False):
+        super().__init__(headless_mode)
+        self.path2food = []
+        self.reverse = 1
 
-	
-	def __str__(self): # Para la impresion
-		b_str = " " + "_"*self.width + f"  Score: {self.score}\n"
-		for i in range(self.height):
-			b_str += "|"
-			for j in range(self.width):
-				if self.board[i, j] == 2: # if [i, j] == self.head
-					b_str += "X"
-				elif self.board[i, j] == 1: # elif [i, j] in self.snake:
-					b_str += "x"
-				elif self.board[i, j] == -1: # elif [i, j] == self.food:
-					b_str += "O"
-				else:
-					b_str += " "
-			b_str += "|\n"
-		b_str += u" \u0305"*self.width 
-		return b_str
+    def get_safe_moves(self, temp_head = None): 
+        moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+        unsafe_moves = []
 
-	def input_movimiento(self,move):
-		moves = ["w","s","a","d"]
-		dirs = [[-1,0],[1,0],[0,-1],[0,1]]
+        if temp_head == None:
+            temp_head_orig = self.head.copy()
+        else:
+            temp_head_orig = temp_head.copy()
+        # remove unsafe moves
+        for move in moves:
+            temp_head = temp_head_orig.copy()
+            temp_head[0] += move[0]
+            temp_head[1] += move[1]
 
-		for i, v in enumerate(moves):
-			if move == v:
-				return dirs[i]
-		
-		return self.direccion
+            if temp_head[0] < 0 or temp_head[0] >= self.height:
+                unsafe_moves.append(move)
+            elif temp_head[1] < 0 or temp_head[1] >= self.width:
+                unsafe_moves.append(move)
+            elif temp_head in self.snake: 
+                unsafe_moves.append(move)
 
-
-	def comida_aleatoria(self):
-		espacios_vacios = [[i, j] for i in range(self.height) for j in range(self.width) if self.board[i, j] == 0]
-		return rand.choices(espacios_vacios)[0]
-	
-	def actualizar_direccion(self, direccion):
-		temp_head = [self.head[0] + direccion[0], self.head[1] + direccion[1]]
-		if temp_head != self.snake[1]: # make sure it's not previous body part
-			self.direccion = direccion
-
-	def actualizar_estado(self):
-		self.head[0] += self.direccion[0]
-		self.head[1] += self.direccion[1]
-
-		if self.head[0] < 0 or self.head[0] >= self.height:
-			self.head = self.snake[0].copy() # did not enter valid move
-			self.game_state = False
-		elif self.head[1] < 0 or self.head[1] >= self.width:
-			self.head = self.snake[0].copy() # did not enter valid move
-			self.game_state = False
-		elif self.head in self.snake[2::]: # snake in body and no u-turn
-			self.head = self.snake[0].copy() # did not enter valid move
-			self.game_state = False 
-		elif self.head not in self.snake: # snake moved
-			if self.head == self.food: # ate food, grow snake, gen food
-				self.score += 1
-				self.snake.insert(0, self.head.copy())
-				self.board[self.snake[1][0], self.snake[1][1]] = 1
-				self.board[self.head[0], self.head[1]] = 2
-				self.food = self.comida_aleatoria()
-				self.board[self.food[0], self.food[1]] = -1
-			else: # move snake
-				self.snake.insert(0, self.head.copy())
-				self.board[self.snake[1][0], self.snake[1][1]] = 1
-				self.board[self.head[0], self.head[1]] = 2
-				rem = self.snake.pop()
-				self.board[rem[0], rem[1]] = 0
-		else:
-			self.head = self.snake[0].copy() # did not enter valid move
-	
-	def ver_comida(self, loc):
-		if self.food[0] == loc[0] and self.food[1] == loc[1]:
-			return True
-		else:
-			return False
-	
-	def espacio_vacio(self):
-		return [[i, j] for i in range(self.height) for j in range(self.width) if self.board[i, j] == 0 or self.board[i, j] == -1]
-
-	def mov_no_seguro(self, moves, no_seguros):
-		for move in moves:
-			temp_head = self.head.copy()
-			temp_head[0] += move[0]
-			temp_head[1] += move[1]
-
-			if temp_head[0] < 0 or temp_head[0] >= self.height:
-				no_seguros.append(move)
-			elif temp_head[1] < 0 or temp_head[1] >= self.width:
-				no_seguros.append(move)
-			elif temp_head in self.snake:
-				no_seguros.append(move)
-		
-		for move in no_seguros:
-			moves.remove(move)
-		
-		return moves
-
-	def moverse_lejos(self):
-		moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-		no_seguros = []
-		direc_food = []
-		
-		d0 = -self.food[0] + self.head[0]
-		if d0 != 0:
-			direc_food.append([d0 // abs(d0), 0])
-
-		d1 = -self.food[1] + self.head[1]
-		if d1 != 0:
-			direc_food.append([0, d1 // abs(d1)])
-
-		# eliminar movimientos no seguros
-		moves = self.mov_no_seguro(moves, no_seguros)
-
-		# moverse hacia la comida primer
-		self.reverse *= -1 # para ir cambiando de direccion
-		for move in moves[::self.reverse]:
-			if move in direc_food:
-				return move
-			
-		if len(moves) == 0: # no hay movimientos seguros
-			return [1, 0]
-		else:
-			return rand.choice(moves)
-
-	def heuristica(self, head):
-		# distancia Manhattan
-		d0 = self.food[0] - head[0]
-		d1 = self.food[1] - head[1]
-		return np.sqrt(d0**2 + d1**2)
-	
-	def get_movimiento_seguro(self, temp_head = None):
-		moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-		no_seguro = []
-		if temp_head == None:
-			temp_head_orig = self.head.copy()
-		else:
-			temp_head_orig = temp_head.copy()
-		# quitar movimientos no seguros
-		moves = self.mov_no_seguro(moves, no_seguro)
-		
-		return moves
-
-	def movimiento_seguro(self):
-		moves = self.get_movimiento_seguro()
-		if len(moves) == 0:
-			moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-		return rand.choice(moves)
-
-	def A_star(self, temp_head):
-		self.food_found = False
-		self.not_explored = []
-		self.explored = []
-		self.parents = dict()
-		self.explored.append(temp_head)
-		moves = self.get_movimiento_seguro(temp_head)
-
-		for move in moves:
-			head = temp_head.copy()
-			head[0] += move[0]
-			head[1] += move[1]
-			h = self.heuristica(head) # aplicamos la heuristica
-
-			if str(head) not in self.parents.keys():
-				self.parents[str(head)] = temp_head
-			
-			if head in self.explored:
-				continue
-			
-			if self.ver_comida(head):
-				self.food_found = True
-				return
-			
-			if [h, head] not in self.not_explored:
-				self.not_explored.insert(0, [h, head])
-				self.not_explored.sort()
-
-	def busqueda_A_star(self, temp_head = None):
-		self.food_found = False
-		self.not_explored = []
-		self.explored = []
-		self.parents = dict()
-		if temp_head == None:
-			temp_head = self.head.copy()
-		orig_head = temp_head.copy()
-
-		moves = self.get_movimiento_seguro(temp_head)
-
-		for move in moves:
-			head = temp_head.copy()
-			head[0] += move[0]
-			head[1] += move[1]
-			h = self.heuristica(head)
-			if str(head) not in self.parents.keys():
-				self.parents[str(head)] = temp_head
-			if self.ver_comida(head):
-				return move
-			else:
-				self.not_explored.insert(0, [h, head])
-				self.not_explored.sort()
-		
-		while len(self.not_explored) > 0:
-			h_th = self.not_explored.pop(0)
-			self.A_star(h_th[0])
-			if self.food_found:
-				break
-		
-		if self.food_found:
-			location = self.food
-			while self.parents[str(location)] != orig_head:
-				location = self.parents[str(location)]
-			return [location[0] - orig_head[0], location[1] - orig_head[1]]
-		elif len(self.explored) > 0:
-			location = self.explored[-1]
-			while self.parents[str(location)] != orig_head:
-				location = self.parents[str(location)]
-			return [location[0] - orig_head[0], location[1] - orig_head[1]]
-		else:
-			return self.moverse_lejos()
-	def run_game(self, player_ai = None):
-		update_rate = 1
-		fps = 60
-		counter = 0
-		vel = self.vel		
-		pygame.init()
-		myfont = pygame.font.SysFont("monospace", 65)
-		self.draw_board()
-		pygame.display.update()
-		exit_flag = False
-		while exit_flag == False and self.game_state == True:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					exit_flag = True
-				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_UP:
-						vel = [-1, 0]
-					elif event.key == pygame.K_DOWN:
-						vel = [1, 0]
-					elif event.key == pygame.K_LEFT:
-						vel = [0, -1]
-					elif event.key == pygame.K_RIGHT:
-						vel = [0, 1]
-					else:
-						vel = self.vel
-			
-			time.sleep(1.0/fps)
-			counter += 1
-			if counter >= update_rate:
-				if player_ai != None:
-					vel = player_ai()
-				self.update_vel(vel)
-				self.update_state()
-				counter = 0
-			self.draw_board()
-			pygame.display.update()
-		label = myfont.render(f"Game Over!", 1, self.RED)
-		self.SCREEN.blit(label, (self.WIDTH+10,50))
-		pygame.display.update()
-		while exit_flag == False:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					exit_flag = True
-		pygame.quit()
+        for move in unsafe_moves:
+            moves.remove(move)
         
+        return moves
+
+    def wiggle_away(self):
+        moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+        unsafe_moves = []
+        food_dir = []
+        
+        d0 = -self.food[0] + self.head[0]
+        if d0 != 0:
+            food_dir.append([d0//abs(d0), 0])
+        d1 = -self.food[1] + self.head[1]
+        if d1 != 0:
+            food_dir.append([0, d1//abs(d1)])
+
+        # remove unsafe moves
+        for move in moves:
+            temp_head = self.head.copy()
+            temp_head[0] += move[0]
+            temp_head[1] += move[1]
+
+            if temp_head[0] < 0 or temp_head[0] >= self.height:
+                unsafe_moves.append(move)
+            elif temp_head[1] < 0 or temp_head[1] >= self.width:
+                unsafe_moves.append(move)
+            elif temp_head in self.snake: 
+                unsafe_moves.append(move)
+
+        for move in unsafe_moves:
+            moves.remove(move)
+        
+        # move towards food first
+        self.reverse *= -1 # to alternate turning direction
+        for move in moves[::self.reverse]:
+        # for move in moves:
+            if move in food_dir:
+                return move
+            
+        if len(moves) == 0: # no safe moves
+            return [1, 0]
+        else:
+            return rand.choice(moves)
+
+    def check4food(self, loc):
+        if self.food[0] == loc[0] and self.food[1] == loc[1]:
+            return True
+        else:
+            return False
+
+    def empty_spaces(self):
+        return [[i, j] for i in range(self.height) for j in range(self.width) if self.board[i, j] == 0 or self.board[i, j] == -1]
+
+
+    def heuristic(self, head):
+        # distance to food
+        d0 = self.food[0] - head[0]
+        d1 = self.food[1] - head[1]
+        return np.sqrt(d0**2 + d1**2)
+
+    def astar_explore(self, temp_head):
+        self.explored.append(temp_head)
+        moves = self.get_safe_moves(temp_head)
+
+        for move in moves:
+            head = temp_head.copy()
+            head[0] += move[0]
+            head[1] += move[1]
+            h = self.heuristic(head)
+
+            if str(head) not in self.parents.keys():
+                self.parents[str(head)] = temp_head
+
+            if head in self.explored:
+                continue
+
+            if self.check4food(head):
+                self.food_found = True
+                return 
+            if [h, head] not in self.not_explored:
+                self.not_explored.insert(0, [h, head])
+                self.not_explored.sort()
+
+    def astar_search(self, temp_head = None):
+        self.food_found = False
+        self.not_explored = []
+        self.explored = []
+        self.parents = dict()
+
+        if temp_head == None:
+            temp_head = self.head.copy()
+        orig_head = temp_head.copy()
+
+        moves = self.get_safe_moves(temp_head)
+
+        for move in moves:
+            head = temp_head.copy()
+            head[0] += move[0]
+            head[1] += move[1]
+            h = self.heuristic(head)
+            if str(head) not in self.parents.keys():
+                self.parents[str(head)] = temp_head
+            if self.check4food(head):
+                return move
+            else:
+                self.not_explored.insert(0, [h, head])
+                self.not_explored.sort()
+        
+        while len(self.not_explored) > 0:
+            h_th = self.not_explored.pop(0)
+            self.astar_explore(h_th[1])
+            if self.food_found:
+                break
+
+        if self.food_found: # back track to move
+            loc = self.food
+            while self.parents[str(loc)] != orig_head:
+                loc = self.parents[str(loc)]
+            return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+
+        elif len(self.explored) > 0: 
+            loc = self.explored[-1] # last point
+            while self.parents[str(loc)] != orig_head:
+                loc = self.parents[str(loc)]
+            return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+
+        else: # no path to food, no path to far point
+            return self.wiggle_away() #safe_move() # rand.choice([[1, 0], [-1, 0], [0, 1], [0, -1]])
+
+    def run_game(self, player_ai = None):
+        update_rate = 1
+        fps = 60
+        counter = 0
+        vel = self.vel
+        pygame.init()
+        myfont = pygame.font.SysFont("monospace", 65)
+        self.draw_board()
+        pygame.display.update()
+        exit_flag = False
+        while exit_flag == False and self.game_state == True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit_flag = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        vel = [-1, 0]
+                    elif event.key == pygame.K_DOWN:
+                        vel = [1, 0]
+                    elif event.key == pygame.K_LEFT:
+                        vel = [0, -1]
+                    elif event.key == pygame.K_RIGHT:
+                        vel = [0, 1]
+                    else:
+                        vel = self.vel
+            
+            time.sleep(1.0/fps)
+            counter += 1
+            if counter >= update_rate:
+                if player_ai != None:
+                    vel = player_ai()
+                self.update_vel(vel)
+                self.update_state()
+                counter = 0
+            self.draw_board()
+            pygame.display.update()
+        label = myfont.render(f"Game Over!", 1, self.RED)
+        self.SCREEN.blit(label, (self.WIDTH+10,50))
+        pygame.display.update()
+        while exit_flag == False:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit_flag = True 
+        pygame.quit()
+
+
 def main():
-    my_game = SnakeGame()
-    # my_game.run_game(my_game.astar1move)
-    my_game.run_game(my_game.busqueda_A_star)
-    # # stats run
-    # N = 100
-    # scores = []
-    # for i in range(N):
-    #     my_game = SnakeGameAStar(True) # headless mode
-    #     while(my_game.game_state):        
-    #         vel = my_game.astar_search()
-    #         my_game.update_vel(vel)
-    #         my_game.update_state()
-    #     scores.append(my_game.score)
-    #     print(f"{i+1} runs complete! Score: {my_game.score}")
-    # print(f"max score: {max(scores)}")
-    # print(f"mean score: {np.mean(scores)}")
-    
+    my_game = SnakeGameAStar()
+    my_game.run_game(my_game.astar_search)
+
 if __name__ == "__main__":
     main()
