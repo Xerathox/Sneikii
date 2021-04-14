@@ -95,7 +95,7 @@ class SnakeGame():
 			return True
 		else:
 			return False
-
+	
 	def espacio_vacio(self):
 		return [[i, j] for i in range(self.height) for j in range(self.width) if self.board[i, j] == 0 or self.board[i, j] == -1]
 
