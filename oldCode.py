@@ -210,7 +210,7 @@ class SnakeGame():
 		for move in moves:
 			head = temp_head.copy()
 			head[0] += move[0]
-			head[0] += move[0]
+			head[1] += move[1]
 			h = self.heuristica(head)
 			if str(head) not in self.parents.keys():
 				self.parents[str(head)] = temp_head
@@ -222,7 +222,7 @@ class SnakeGame():
 		
 		while len(self.not_explored) > 0:
 			h_th = self.not_explored.pop(0)
-			self.A_star(h_th[1])
+			self.A_star(h_th[0])
 			if self.food_found:
 				break
 		
@@ -256,7 +256,7 @@ while game.game_state:
 	# Pop a esa lista de movimientos -> dir
 	# Cuando el score cambie, correr a-start nuevamente
 
-	#print(game.busqueda_A_star()) #default
+	print(game.busqueda_A_star()) #default
 
 	game.actualizar_direccion(dire)
 	game.actualizar_estado()
