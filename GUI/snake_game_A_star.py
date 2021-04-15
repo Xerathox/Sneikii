@@ -85,10 +85,6 @@ class SnakeGameAStar(SnakeGameGUI):
         else:
             return False
 
-    def empty_spaces(self):
-        return [[i, j] for i in range(self.height) for j in range(self.width) if self.board[i, j] == 0 or self.board[i, j] == -1]
-
-
     def heuristic(self, head):
         # distance to food
         d0 = self.food[0] - head[0]
