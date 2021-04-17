@@ -82,12 +82,15 @@ class sneikii():
 		if self.head[0] < 0 or self.head[0] >= self.height:
 			self.head = self.snake[0].copy() # movimiento invalido
 			self.gaming = False
+
 		elif self.head[1] < 0 or self.head[1] >= self.width:
 			self.head = self.snake[0].copy() # movimiento invalido
 			self.gaming = False
+
 		elif self.head in self.snake[2::]: # serpiente en cuerpo y no hay vuelta en U
 			self.head = self.snake[0].copy() # movimiento invalido
 			self.gaming = False 
+
 		elif self.head not in self.snake: # serpiente se movio
 			if self.head == self.food: # comio comida, serpiente crece, generar comida
 				self.score += 1
@@ -96,6 +99,7 @@ class sneikii():
 				self.board[self.head[0], self.head[1]] = 2
 				self.food = self.getRandomBlank()
 				self.board[self.food[0], self.food[1]] = -1
+				
 			else: # Mover serpiente
 				self.snake.insert(0, self.head.copy())
 				self.board[self.snake[1][0], self.snake[1][1]] = 1
