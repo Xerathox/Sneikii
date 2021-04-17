@@ -9,37 +9,37 @@ class SnakeGameGUI(SnakeGame):
     
     def __init__(self, headless_mode = False):
         super().__init__()
-        self.BLUE = (0, 0, 255)
-        self.PURPLE = (255, 0, 255)
-        self.BLACK = (0, 0, 0)
-        self.RED = (255, 0, 0)
-        self.SQUARESIZE = 10
-        self.WIDTH = self.SQUARESIZE*self.width
-        self.HEIGHT = self.SQUARESIZE*self.height
-        self.SIZE = (self.WIDTH + 400, self.HEIGHT)
+        self.AZUL = (0, 0, 255)
+        self.MORADO = (255, 0, 255)
+        self.NEGRO = (0, 0, 0)
+        self.ROJO = (255, 0, 0)
+        self.TAMAÑO_CUADRADO = 10
+        self.ANCHO = self.TAMAÑO_CUADRADO*self.ancho
+        self.ALTO = self.TAMAÑO_CUADRADO*self.alto
+        self.TAMAÑO = (self.ANCHO + 400, self.ALTO)
 
         if headless_mode == False:
-            self.SCREEN = pygame.display.set_mode(self.SIZE)
+            self.SCREEN = pygame.display.set_mode(self.TAMAÑO)
             pygame.init()
 
-    def draw_board(self):
+    def dibujar_tablero(self):
         myfont = pygame.font.SysFont("monospace", 50)
-        self.SCREEN.fill(self.BLACK)
-        for i in range(self.height):
-            for j in range(self.width):
+        self.SCREEN.fill(self.NEGRO)
+        for i in range(self.alto):
+            for j in range(self.alto):
                 # check for head, body, food
-                if self.board[i, j] == 1:
-                    loc_size = (j*self.SQUARESIZE, i*self.SQUARESIZE, self.SQUARESIZE, self.SQUARESIZE)
-                    pygame.draw.rect(self.SCREEN, self.BLUE, loc_size)
-                elif self.board[i, j] == 2:
-                    loc_size = (j*self.SQUARESIZE, i*self.SQUARESIZE, self.SQUARESIZE, self.SQUARESIZE)
-                    pygame.draw.rect(self.SCREEN, self.PURPLE, loc_size)
-                elif self.board[i, j] == -1:
-                    loc = (int((j+0.5)*self.SQUARESIZE), int((i+0.5)*self.SQUARESIZE))
-                    pygame.draw.circle(self.SCREEN, self.RED, loc, self.SQUARESIZE//2)
+                if self.tablero[i, j] == 1:
+                    tam_loc = (j*self.TAMAÑO_CUADRADO, i*self.TAMAÑO_CUADRADO, self.TAMAÑO_CUADRADO, self.TAMAÑO_CUADRADO)
+                    pygame.draw.rect(self.SCREEN, self.AZUL, tam_loc)
+                elif self.tablero[i, j] == 2:
+                    tam_loc = (j*self.TAMAÑO_CUADRADO, i*self.TAMAÑO_CUADRADO, self.TAMAÑO_CUADRADO, self.TAMAÑO_CUADRADO)
+                    pygame.draw.rect(self.SCREEN, self.MORADO, tam_loc)
+                elif self.tablero[i, j] == -1:
+                    loc = (int((j+0.5)*self.TAMAÑO_CUADRADO), int((i+0.5)*self.TAMAÑO_CUADRADO))
+                    pygame.draw.circle(self.SCREEN, self.ROJO, loc, self.TAMAÑO_CUADRADO//2)
         
-        label = myfont.render(f"Score: {self.score}", 1, self.PURPLE)
-        self.SCREEN.blit(label, (self.WIDTH + 10,10))
-        loc_size = (self.WIDTH, 0, 3, self.HEIGHT)
-        pygame.draw.rect(self.SCREEN, (255, 255, 255), loc_size)
+        label = myfont.render(f"Score: {self.puntaje}", 1, self.MORADO)
+        self.SCREEN.blit(label, (self.ANCHO + 10,10))
+        tam_loc = (self.ANCHO, 0, 3, self.ALTO)
+        pygame.draw.rect(self.SCREEN, (255, 255, 255), tam_loc)
         pygame.display.update()
