@@ -14,7 +14,7 @@ class SnakeGameAStar(SnakeGameGUI):
         self.reversa = 1
         self.temp_head_orig = []
     
-    def movimiento_no_seguro(self, movimientos, mov_no_seguros, temp_head_orig = None):
+    def movimiento_no_seguro(self, movimientos, mov_no_seguros):
         for mov in movimientos:
             temp_head = self.head.copy()
             temp_head[0] += mov[0]
@@ -37,12 +37,12 @@ class SnakeGameAStar(SnakeGameGUI):
         mov_no_seguros = []
 
         if temp_head == None:
-            temp_head_orig = self.head.copy()
+            self.temp_head_orig = self.head.copy()
         else:
-            temp_head_orig = temp_head.copy()
+            self.temp_head_orig = temp_head.copy()
         # remove unsafe moves
         for mov in movimientos:
-            temp_head = temp_head_orig.copy()
+            temp_head = self.temp_head_orig.copy()
             temp_head[0] += mov[0]
             temp_head[1] += mov[1]
 
@@ -72,7 +72,7 @@ class SnakeGameAStar(SnakeGameGUI):
 
         # remove unsafe moves
         for mov in movimientos:
-            temp_head = temp_head_orig.copy()
+            temp_head = self.temp_head_orig.copy()
             temp_head[0] += mov[0]
             temp_head[1] += mov[1]
 
