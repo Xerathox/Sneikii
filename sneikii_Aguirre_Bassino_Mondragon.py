@@ -15,18 +15,18 @@ class sneikii():
 
 		# Tablero
 		self.height = height
-		self.width = width
-		self.board = np.zeros([self.height, self.width])
-		self.score = 0
+		self.width  = width
+		self.board  = np.zeros([self.height, self.width])
+		self.score  = 0
 
 		# Direcciones
-		self.inputs = ["w","s","a","d"]
+		self.inputs     = ["w","s","a","d"]
 		self.directions = [[-1,0],[1,0],[0,-1],[0,1]]
-		self.direction = rnd.Random().choice(self.directions) # Obtener una direccion aleatoria
-		self.reverse = None
+		self.direction  = rnd.Random().choice(self.directions) # Obtener una direccion aleatoria
+		self.reverse    = None
 
 		# Serpiente
-		self.head = [self.height//2, self.width//2] # Ubicar la serpiente al medio
+		self.head  = [self.height//2, self.width//2] # Ubicar la serpiente al medio
 		self.snake = [[self.head[0] - i*self.direction[0], self.head[1] - i*self.direction[1]] for i in range(3)] # Obtener coordenadas del cuerpo de la serpiente segun la posicion de la cabeza
 		
 		# Rellenar Tablero, -1 : comida, 1 : cuerpo, 2 : cabeza
@@ -99,7 +99,7 @@ class sneikii():
 				self.board[self.head[0], self.head[1]] = 2
 				self.food = self.getRandomBlank()
 				self.board[self.food[0], self.food[1]] = -1
-				
+
 			else: # Mover serpiente
 				self.snake.insert(0, self.head.copy())
 				self.board[self.snake[1][0], self.snake[1][1]] = 1
