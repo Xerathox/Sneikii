@@ -13,7 +13,7 @@ class SnakeGameAStar(SnakeGameGUI):
         self.reversa = 1
         self.temp_head_orig = []
 
-    def mov_no_seguro(self, movimientos, mov_no_seguros):
+    def mov_lista(self, movimientos, mov_no_seguros):
         for mov in movimientos:
             temp_head = self.temp_head_orig.copy()
             temp_head[0] += mov[0]
@@ -40,7 +40,7 @@ class SnakeGameAStar(SnakeGameGUI):
         else:
             self.temp_head_orig = temp_head.copy()
         
-        return self.mov_no_seguro(movimientos, mov_no_seguros)
+        return self.mov_lista(movimientos, mov_no_seguros)
 
     def deslizarse(self):
         movimientos = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -55,7 +55,7 @@ class SnakeGameAStar(SnakeGameGUI):
             dir_comida.append([0, d1//abs(d1)])
 
         # remover movimientos no seguros
-        movimientos = self.mov_no_seguro(movimientos, mov_no_seguros)
+        movimientos = self.mov_lista(movimientos, mov_no_seguros)
                 
         # moverse primero hacia la comida
         self.reversa *= -1 # para alterar cambio de direccion
