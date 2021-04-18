@@ -50,6 +50,7 @@ class SnakeGameAStar(SnakeGameGUI):
         d0 = -self.comida[0] + self.head[0]
         if d0 != 0:
             dir_comida.append([d0//abs(d0), 0])
+            
         d1 = -self.comida[1] + self.head[1]
         if d1 != 0:
             dir_comida.append([0, d1//abs(d1)])
