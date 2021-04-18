@@ -10,7 +10,8 @@ Implementación del algoritmo A* (a-star) en un videojuego.
 ## Imágenes
 version 0.75:
 
-![juego nivel consola](img/01.png)
+![juego terminado](img/
+qwf.JPG)
 
 
 
