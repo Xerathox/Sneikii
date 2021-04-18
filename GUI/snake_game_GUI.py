@@ -1,6 +1,6 @@
 from snake_game import SnakeGame
 import pygame
-import time
+# import time
 import random
 
 rand = random.Random()

@@ -10,13 +10,12 @@ class SnakeGameAStar(SnakeGameGUI):
     
     def __init__(self, headless_mode = False):
         super().__init__(headless_mode)
-        # self.path2food = []
         self.reversa = 1
         self.temp_head_orig = []
-    
-    def movimiento_no_seguro(self, movimientos, mov_no_seguros):
+
+    def mov_no_seguro(self, movimientos, mov_no_seguros):
         for mov in movimientos:
-            temp_head = self.head.copy()
+            temp_head = self.temp_head_orig.copy()
             temp_head[0] += mov[0]
             temp_head[1] += mov[1]
 
@@ -40,25 +39,10 @@ class SnakeGameAStar(SnakeGameGUI):
             self.temp_head_orig = self.head.copy()
         else:
             self.temp_head_orig = temp_head.copy()
-        # remove unsafe moves
-        for mov in movimientos:
-            temp_head = self.temp_head_orig.copy()
-            temp_head[0] += mov[0]
-            temp_head[1] += mov[1]
-
-            if temp_head[0] < 0 or temp_head[0] >= self.alto:
-                mov_no_seguros.append(mov)
-            elif temp_head[1] < 0 or temp_head[1] >= self.ancho:
-                mov_no_seguros.append(mov)
-            elif temp_head in self.snake: 
-                mov_no_seguros.append(mov)
-
-        for mov in mov_no_seguros:
-            movimientos.remove(mov)
         
-        return movimientos
+        return self.mov_no_seguro(movimientos, mov_no_seguros)
 
-    def wiggle_away(self):
+    def deslizarse(self):
         movimientos = [[-1, 0], [1, 0], [0, -1], [0, 1]]
         mov_no_seguros = []
         dir_comida = []
@@ -70,30 +54,17 @@ class SnakeGameAStar(SnakeGameGUI):
         if d1 != 0:
             dir_comida.append([0, d1//abs(d1)])
 
-        # remove unsafe moves
-        for mov in movimientos:
-            temp_head = self.temp_head_orig.copy()
-            temp_head[0] += mov[0]
-            temp_head[1] += mov[1]
-
-            if temp_head[0] < 0 or temp_head[0] >= self.alto:
-                mov_no_seguros.append(mov)
-            elif temp_head[1] < 0 or temp_head[1] >= self.ancho:
-                mov_no_seguros.append(mov)
-            elif temp_head in self.snake: 
-                mov_no_seguros.append(mov)
-
-        for mov in mov_no_seguros:
-            movimientos.remove(mov)
+        # remover movimientos no seguros
+        movimientos = self.mov_no_seguro(movimientos, mov_no_seguros)
                 
-        # move towards food first
-        self.reversa *= -1 # to alternate turning direction
+        # moverse primero hacia la comida
+        self.reversa *= -1 # para alterar cambio de direccion
         for mov in movimientos[::self.reversa]:
         # for move in moves:
             if mov in dir_comida:
                 return mov
             
-        if len(movimientos) == 0: # no safe moves
+        if len(movimientos) == 0: # no hay mov seguross
             return [1, 0]
         else:
             return rand.choice(movimientos)
@@ -103,7 +74,7 @@ class SnakeGameAStar(SnakeGameGUI):
             return True
         else:
             return False
-
+    
     def heuristica(self, head):
         # distancia euclidania para la heuristica
         d0 = self.comida[0] - head[0]
@@ -164,20 +135,20 @@ class SnakeGameAStar(SnakeGameGUI):
             if self.comida_encontrada:
                 break
 
-        if self.comida_encontrada: # back track to move
+        if self.comida_encontrada: # backtrack para moverse
             loc = self.comida
             while self.padres[str(loc)] != orig_head:
                 loc = self.padres[str(loc)]
             return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
 
         elif len(self.explorado) > 0: 
-            loc = self.explorado[-1] # last point
+            loc = self.explorado[-1] # ultimo punto
             while self.padres[str(loc)] != orig_head:
                 loc = self.padres[str(loc)]
             return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
 
-        else: # no path to food, no path to far point
-            return self.wiggle_away() #safe_move() # rand.choice([[1, 0], [-1, 0], [0, 1], [0, -1]])
+        else: # no hay camino para comida, no hay camino para el punto lejano
+            return self.deslizarse() #mov_seguro() # rand.opciones([[1, 0], [-1, 0], [0, 1], [0, -1]])
 
     def run_game(self, player_ai = None):
         actualizar_rate = 1
