@@ -152,54 +152,6 @@ class SnakeGameAStar(SnakeGameGUI):
         else: # no hay camino para comida, no hay camino para el punto lejano
             return self.deslizarse() #mov_seguro() # rand.opciones([[1, 0], [-1, 0], [0, 1], [0, -1]])
 
-    def run_game(self, player_ai = None):
-        actualizar_rate = 1
-        fps = 60
-        contador = 0
-        distancia = self.distancia
-        pygame.init()
-        myfont = pygame.font.SysFont("monospace", 65)
-        self.dibujar_tablero()
-        pygame.display.update()
-        exit_flag = False
-
-        # Loop principal del juego
-        while exit_flag == False and self.game_state == True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit_flag = True
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        direccion = [-1, 0]
-                    elif event.key == pygame.K_DOWN:
-                        direccion = [1, 0]
-                    elif event.key == pygame.K_LEFT:
-                        direccion = [0, -1]
-                    elif event.key == pygame.K_RIGHT:
-                        direccion = [0, 1]
-                    else:
-                        distancia = self.distancia
-            time.sleep(1.0/fps)
-            contador += 1
-            if contador >= actualizar_rate:
-                if player_ai != None:
-                    direccion = player_ai()
-                self.actualizar_distancia(direccion)
-                self.actualizar_estado()
-                contador = 0
-            self.dibujar_tablero()
-            pygame.display.update()
-        
-        # --- perdimos el juego ---
-        label = myfont.render(f"Game Over!", 1, self.ROJO)
-        self.SCREEN.blit(label, (self.ANCHO + 10, 50))
-        pygame.display.update()
-        while exit_flag == False:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit_flag = True 
-        pygame.quit()
-
 
 def main():
     my_game = SnakeGameAStar()
