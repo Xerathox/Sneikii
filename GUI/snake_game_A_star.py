@@ -1,6 +1,5 @@
 from snake_game_GUI import SnakeGameGUI
 import pygame
-import time
 import random
 import numpy as np
 
