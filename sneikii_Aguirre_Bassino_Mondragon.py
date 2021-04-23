@@ -7,6 +7,8 @@ import numpy as np
 import random as rnd
 import os
 
+rand = rnd.Random()
+
 # Clase Nodo
 class Node():
 	def __init__(self, parent=None, position=None):
@@ -30,10 +32,10 @@ class Sneikii():
 		self.cost = 1
 
 		# Direcciones
-		self.inputs     = ["w","s","a","d"]
+		self.inputs	 = ["w","s","a","d"]
 		self.directions = [[-1,0],[0,-1],[1,0],[0,1]]
 		self.direction  = rnd.Random().choice(self.directions) # Obtener una direccion aleatoria
-		self.reverse    = None
+		self.reverse	= None
 
 		# Serpiente
 		self.head  = [self.height//2, self.width//2] # Ubicar la serpiente al medio
@@ -45,6 +47,10 @@ class Sneikii():
 		self.board[self.head[0], self.head[1]] = 2 # Marcar la cabeza de la serpiente en el tablero
 		self.food = self.getRandomBlank()
 		self.board[self.food[0], self.food[1]] = 3 # Marcar la comida de la serpiente en el tablero
+
+		#### TEST
+		self.reversa = 1
+		self.temp_head_orig = []
 
 		
 	# Imprimir el tablero con la serpiente
@@ -114,10 +120,6 @@ class Sneikii():
 				self.board[self.head[0], self.head[1]] = 2
 				self.food = self.getRandomBlank() # Generar mas comida
 				self.board[self.food[0], self.food[1]] = 3
-				for i in range(len(self.board)):
-					for j in range(len(self.board[i])):
-						if self.board[i][j] == 4:
-							self.board[i][j] = 0
 			else: # Mover serpiente
 				self.snake.insert(0, self.head.copy())
 				self.board[self.snake[1][0], self.snake[1][1]] = 1
@@ -140,7 +142,10 @@ class Sneikii():
 
 		# El valor con el que se marcara el camino
 		mark = 4
-
+		for i in range(self.height):
+			for j in range(self.width):
+				if self.board[i][j] == 4:
+					self.board[i][j] = 0
 		# Marcamos el camino en el tablero
 		for i in range(1,len(path)-1): # Imprimimos todo el camino excepto el primer y ultimo valor que representa inicio y final
 			self.board[path[i][0]][path[i][1]] = mark
@@ -247,8 +252,137 @@ class Sneikii():
 				toVisit.append(child)
 		
 	# IMPORTANTE
-	def programar(self):
-		pass
+	def mov_lista(self, movimientos, mov_no_seguros):
+		for mov in movimientos:
+			temp_head = self.temp_head_orig.copy()
+			temp_head[0] += mov[0]
+			temp_head[1] += mov[1]
+
+			if temp_head[0] < 0 or temp_head[0] >= self.height:
+				mov_no_seguros.append(mov)
+			elif temp_head[1] < 0 or temp_head[1] >= self.width:
+				mov_no_seguros.append(mov)
+			elif temp_head in self.snake: 
+				mov_no_seguros.append(mov)
+
+		for mov in mov_no_seguros:
+			movimientos.remove(mov)
+		
+		return movimientos
+
+	def mov_seguros(self, temp_head = None): 
+		movimientos = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+		mov_no_seguros = []
+
+		if temp_head == None:
+			self.temp_head_orig = self.head.copy()
+		else:
+			self.temp_head_orig = temp_head.copy()
+		
+		return self.mov_lista(movimientos, mov_no_seguros)
+
+	def deslizarse(self):
+		movimientos = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+		mov_no_seguros = []
+		dir_comida = []
+		
+		d0 = -self.food[0] + self.head[0]
+		if d0 != 0:
+			dir_comida.append([d0//abs(d0), 0])
+
+		d1 = -self.food[1] + self.head[1]
+		if d1 != 0:
+			dir_comida.append([0, d1//abs(d1)])
+
+		# remover movimientos no seguros
+		movimientos = self.mov_lista(movimientos, mov_no_seguros)
+				
+		# moverse primero hacia la comida
+		self.reversa *= -1 # para alterar cambio de direccion
+		for mov in movimientos[::self.reversa]:
+		# for move in moves:
+			if mov in dir_comida:
+				return mov
+			
+		if len(movimientos) == 0: # no hay mov seguross
+			return [1, 0]
+		else:
+			return rand.choice(movimientos)
+
+	def busqueda_A_star(self, temp_head = None):
+		self.comida_encontrada = False
+		self.no_explorado = []
+		self.explorado = []
+		self.padres = dict()
+
+		if temp_head == None:
+			temp_head = self.head.copy()
+		orig_head = temp_head.copy()
+
+		moves = self.mov_seguros(temp_head)
+
+		for move in moves:
+			head = temp_head.copy()
+			head[0] += move[0]
+			head[1] += move[1]
+
+			h = ((self.food[0] - head[0])**2 + (self.food[1] - head[1])**2)**0.5
+			if str(head) not in self.padres.keys():
+				self.padres[str(head)] = temp_head
+			if self.food[0] == head[0] and self.food[1] == head[1]:
+				return move
+			else:
+				self.no_explorado.insert(0, [h, head])
+				self.no_explorado.sort()
+		
+		while len(self.no_explorado) > 0:
+			h_th = self.no_explorado.pop(0)
+			#self.astar_explorar(h_th[1])
+
+			### ACA
+			self.explorado.append(h_th[1])
+			movimientos = self.mov_seguros(h_th[1])
+
+			for mov in movimientos:
+				head = h_th[1].copy()
+				head[0] += mov[0]
+				head[1] += mov[1]
+				h = ((self.food[0] - head[0])**2 + (self.food[1] - head[1])**2)**0.5
+
+				if str(head) not in self.padres.keys():
+					self.padres[str(head)] = h_th[1]
+
+				if head in self.explorado:
+					continue
+
+				if self.food[0] == head[0] and self.food[1] == head[1]:
+					self.comida_encontrada = True
+					break
+					#return 
+
+				if [h, head] not in self.no_explorado:
+					self.no_explorado.insert(0, [h, head])
+					self.no_explorado.sort()
+			
+			if self.comida_encontrada:
+				break
+
+		if self.comida_encontrada: # backtrack para moverse
+			loc = self.food
+			while self.padres[str(loc)] != orig_head:
+				loc = self.padres[str(loc)]
+			return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+
+		elif len(self.explorado) > 0: 
+			loc = self.explorado[-1] # ultimo punto
+			while self.padres[str(loc)] != orig_head:
+				loc = self.padres[str(loc)]
+			return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+
+		else: # no hay camino para comida, no hay camino para el punto lejano
+			return self.deslizarse() #mov_seguro() # rand.opciones([[1, 0], [-1, 0], [0, 1], [0, -1]])
+
+
 	
 
 
@@ -259,12 +393,14 @@ while game.gaming:
 	os.system('cls' if os.name == 'nt' else 'clear') # Limpiar consola
 	for i in game.board:
 		print(i)
+	print("score:",game.score)
 
 	### Mover Manualmente
 	rawInput = input("enter: ")
 	#print(rawInput)
 	#direccion = game.processInput(rawInput)
-	direccion = game.aStar()
+	#direccion = game.aStar()
+	direccion = game.busqueda_A_star()
 	print(direccion)
 
 	game.updateDirection(direccion)
