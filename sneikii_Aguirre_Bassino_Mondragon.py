@@ -114,7 +114,10 @@ class Sneikii():
 				self.board[self.head[0], self.head[1]] = 2
 				self.food = self.getRandomBlank() # Generar mas comida
 				self.board[self.food[0], self.food[1]] = 3
-
+				for i in range(len(self.board)):
+					for j in range(len(self.board[i])):
+						if self.board[i][j] == 4:
+							self.board[i][j] = 0
 			else: # Mover serpiente
 				self.snake.insert(0, self.head.copy())
 				self.board[self.snake[1][0], self.snake[1][1]] = 1
@@ -141,6 +144,7 @@ class Sneikii():
 		# Marcamos el camino en el tablero
 		for i in range(1,len(path)-1): # Imprimimos todo el camino excepto el primer y ultimo valor que representa inicio y final
 			self.board[path[i][0]][path[i][1]] = mark
+			pass
 		
 		# Devolvemos la direccion del primer paso
 		for direction in self.directions:
@@ -175,6 +179,8 @@ class Sneikii():
 		
 		# Loop hasta que encuentre el final
 		while len(toVisit) > 0:
+			if iterations % 2500 == 0:
+				print(iterations)
 			# Cada ves que un nodo es referido de la lista de toVisit, el contador de iteraciones incrementa
 			iterations += 1	
 
@@ -222,9 +228,8 @@ class Sneikii():
 
 			# Iterar a traves de los nodos hijos
 			for child in children:
-				
 				# Comprobar que el nodo hijo no esta en la lista de los visitados
-				if len([visited_child for visited_child in visited if visited_child == child]) > 0:
+				if len([visitedChild for visitedChild in visited if visitedChild == child]) > 0:
 					continue
 
 				# Generar los valores f, g y h
@@ -240,12 +245,20 @@ class Sneikii():
 
 				# Agregar el nodo hijo a la lista de los que faltan visitar
 				toVisit.append(child)
+		
+	# IMPORTANTE
+	def programar(self):
+		pass
 	
 
+
 # # # JUEGO # # #
-game = Sneikii(15,30)
+game = Sneikii()
 while game.gaming:
-	print(game)
+	#print(game)
+	os.system('cls' if os.name == 'nt' else 'clear') # Limpiar consola
+	for i in game.board:
+		print(i)
 
 	### Mover Manualmente
 	rawInput = input("enter: ")
