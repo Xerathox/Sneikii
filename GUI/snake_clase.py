@@ -57,12 +57,15 @@ class SnakeGame():
         if self.head[0] < 0 or self.head[0] >= self.alto:
             self.head = self.snake[0].copy() # did not enter valid move
             self.game_state = False
+
         elif self.head[1] < 0 or self.head[1] >= self.ancho:
             self.head = self.snake[0].copy() # did not enter valid move
             self.game_state = False
+
         elif self.head in self.snake[2::]: # snake in body and no u-turn
             self.head = self.snake[0].copy() # did not enter valid move
             self.game_state = False 
+
         elif self.head not in self.snake: # snake moved
             if self.head == self.comida: # ate food, grow snake, gen food
                 self.puntaje += 1
@@ -71,11 +74,13 @@ class SnakeGame():
                 self.tablero[self.head[0], self.head[1]] = 2
                 self.comida = self.comida_aleatoria()
                 self.tablero[self.comida[0], self.comida[1]] = -1
+
             else: # move snake
                 self.snake.insert(0, self.head.copy())
                 self.tablero[self.snake[1][0], self.snake[1][1]] = 1
                 self.tablero[self.head[0], self.head[1]] = 2
                 rem = self.snake.pop()
                 self.tablero[rem[0], rem[1]] = 0
+                
         else:
             self.head = self.snake[0].copy() # did not enter valid move
