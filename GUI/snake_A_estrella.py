@@ -1,4 +1,4 @@
-from snake_game_GUI import SnakeGameGUI
+from snake_GUI import SnakeGameGUI
 import pygame
 import random
 import numpy as np
@@ -100,7 +100,7 @@ class SnakeGameAStar(SnakeGameGUI):
             if self.verificar_comida(head):
                 self.comida_encontrada = True
                 return 
-                
+
             if [h, head] not in self.no_explorado:
                 self.no_explorado.insert(0, [h, head])
                 self.no_explorado.sort()

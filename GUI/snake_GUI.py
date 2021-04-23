@@ -1,4 +1,4 @@
-from snake_game import SnakeGame
+from snake_clase import SnakeGame
 import pygame
 import time
 import random
