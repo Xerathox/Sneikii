@@ -152,7 +152,7 @@ class Board():
 			for child in children:
 				
 				# Comprobar que el nodo hijo no esta en la lista de los visitados
-				if len([visited_child for visited_child in visited if visited_child == child]) > 0:
+				if len([visitedChild for visitedChild in visited if visitedChild == child]) > 0:
 					continue
 
 				# Generar los valores f, g y h
