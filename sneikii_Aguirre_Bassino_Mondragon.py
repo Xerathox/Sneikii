@@ -116,8 +116,8 @@ class Sneikii():
 				self.board[self.food[0], self.food[1]] = 3
 				for i in range(len(self.board)):
 					for j in range(len(self.board[i])):
-						if self.board[i][j] == "*":
-							self.board[i][j] == " "
+						if self.board[i][j] == 4:
+							self.board[i][j] = 0
 			else: # Mover serpiente
 				self.snake.insert(0, self.head.copy())
 				self.board[self.snake[1][0], self.snake[1][1]] = 1
@@ -179,7 +179,7 @@ class Sneikii():
 		
 		# Loop hasta que encuentre el final
 		while len(toVisit) > 0:
-			if iterations % 1000 == 0:
+			if iterations % 2500 == 0:
 				print(iterations)
 			# Cada ves que un nodo es referido de la lista de toVisit, el contador de iteraciones incrementa
 			iterations += 1	
@@ -245,10 +245,15 @@ class Sneikii():
 
 				# Agregar el nodo hijo a la lista de los que faltan visitar
 				toVisit.append(child)
+		
+	# IMPORTANTE
+	def programar(self):
+		pass
 	
 
+
 # # # JUEGO # # #
-game = Sneikii(15,30)
+game = Sneikii()
 while game.gaming:
 	#print(game)
 	os.system('cls' if os.name == 'nt' else 'clear') # Limpiar consola
