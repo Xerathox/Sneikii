@@ -141,6 +141,7 @@ class Sneikii():
 		# Marcamos el camino en el tablero
 		for i in range(1,len(path)-1): # Imprimimos todo el camino excepto el primer y ultimo valor que representa inicio y final
 			self.board[path[i][0]][path[i][1]] = mark
+			pass
 		
 		# Devolvemos la direccion del primer paso
 		for direction in self.directions:
@@ -175,6 +176,7 @@ class Sneikii():
 		
 		# Loop hasta que encuentre el final
 		while len(toVisit) > 0:
+			print(iterations)
 			# Cada ves que un nodo es referido de la lista de toVisit, el contador de iteraciones incrementa
 			iterations += 1	
 
@@ -222,9 +224,8 @@ class Sneikii():
 
 			# Iterar a traves de los nodos hijos
 			for child in children:
-				
 				# Comprobar que el nodo hijo no esta en la lista de los visitados
-				if len([visited_child for visited_child in visited if visited_child == child]) > 0:
+				if len([visitedChild for visitedChild in visited if visitedChild == child]) > 0:
 					continue
 
 				# Generar los valores f, g y h
