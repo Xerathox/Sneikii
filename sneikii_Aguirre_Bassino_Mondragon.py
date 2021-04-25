@@ -146,6 +146,7 @@ class Sneikii():
 			for j in range(self.width):
 				if self.board[i][j] == 4:
 					self.board[i][j] = 0
+		
 		# Marcamos el camino en el tablero
 		for i in range(1,len(path)-1): # Imprimimos todo el camino excepto el primer y ultimo valor que representa inicio y final
 			self.board[path[i][0]][path[i][1]] = mark
@@ -168,12 +169,12 @@ class Sneikii():
 	def aStar(self):
 		# Crear nodo de comienzo y final con los valores g,h,f inicializados
 		startNode = Node(None, tuple(self.head))
-		startNode.g = startNode.h = startNode.f = 0
+		#startNode.g = startNode.h = startNode.f = 0
 		endNode = Node(None, tuple(self.food))
-		endNode.g = endNode.h = endNode.f = 0
+		#endNode.g = endNode.h = endNode.f = 0
 
 		# Iniciar las listas de visitado y por visitar
-		toVisit = [] # Los que faltan visitar para explorar. Aqui se encuentra el nodo de menor costo para expandir luego
+		toVisit = [] # Los que faltan visitar para explorar. Aqui se encuentra al nodo de menor costo para expandir luego
 		visited = [] # Los que ya han sido explorados
 
 		toVisit.append(startNode) # Agregamos el nodo inicial
@@ -234,7 +235,7 @@ class Sneikii():
 			# Iterar a traves de los nodos hijos
 			for child in children:
 				# Comprobar que el nodo hijo no esta en la lista de los visitados
-				if len([visitedChild for visitedChild in visited if visitedChild == child]) > 0:
+				if child in visited: #if len([visitedChild for visitedChild in visited if visitedChild == child]) > 0:
 					continue
 
 				# Generar los valores f, g y h
@@ -244,14 +245,20 @@ class Sneikii():
 				child.h = (((child.position[0]-endNode.position[0]) ** 2) +  ((child.position[1]-endNode.position[1])** 2))**0.5 
 				child.f = child.g + child.h
 
-				# Comprobar si el nodo hijo ya esta en la lista de los que faltan visitar y si es costo g es ya es mas bajo
-				if len([i for i in toVisit if child == i and child.g > i.g]) > 0:
-					continue
+				# Comprobar si el nodo hijo ya esta en la lista de los que faltan visitar y si el costo g es ya es mas bajo
+				for i in toVisit:
+					if child == i and child.g > i.g:
+						continue
+				#if len([i for i in toVisit if child == i and child.g > i.g]) > 0:
+				#	continue
 
 				# Agregar el nodo hijo a la lista de los que faltan visitar
 				toVisit.append(child)
-		
-	# IMPORTANTE
+
+	def aStarQuick(self):
+		pass
+
+	# Franny
 	def mov_lista(self, movimientos, mov_no_seguros):
 		for mov in movimientos:
 			temp_head = self.temp_head_orig.copy()
@@ -271,7 +278,7 @@ class Sneikii():
 		return movimientos
 
 	def mov_seguros(self, temp_head = None): 
-		movimientos = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+		movimientos = self.directions.copy()
 		mov_no_seguros = []
 
 		if temp_head == None:
@@ -309,38 +316,38 @@ class Sneikii():
 		else:
 			return rand.choice(movimientos)
 
-	def busqueda_A_star(self, temp_head = None):
-		self.comida_encontrada = False
-		self.no_explorado = []
-		self.explorado = []
-		self.padres = dict()
+	def busqueda_A_star(self):
+		comida_encontrada = False
+		no_explorado = []
+		explorado = []
+		padres = dict()
 
-		if temp_head == None:
-			temp_head = self.head.copy()
-		orig_head = temp_head.copy()
+		# Obtener lista de movimientos validos
+		moves = self.mov_seguros()
 
-		moves = self.mov_seguros(temp_head)
-
+		# Generar nodos para los cuadrilateros adyacentes de la ubicacion de cabeza
 		for move in moves:
-			head = temp_head.copy()
-			head[0] += move[0]
-			head[1] += move[1]
+			newPosition = self.head.copy()
+			newPosition[0] += move[0]
+			newPosition[1] += move[1]
 
-			h = ((self.food[0] - head[0])**2 + (self.food[1] - head[1])**2)**0.5
-			if str(head) not in self.padres.keys():
-				self.padres[str(head)] = temp_head
-			if self.food[0] == head[0] and self.food[1] == head[1]:
+			h = ((self.food[0] - newPosition[0])**2 + (self.food[1] - newPosition[1])**2)**0.5
+
+			if str(newPosition) not in padres.keys():
+				padres[str(newPosition)] = self.head
+			if self.food[0] == newPosition[0] and self.food[1] == newPosition[1]:
 				return move
 			else:
-				self.no_explorado.insert(0, [h, head])
-				self.no_explorado.sort()
-		
-		while len(self.no_explorado) > 0:
-			h_th = self.no_explorado.pop(0)
-			#self.astar_explorar(h_th[1])
+				no_explorado.insert(0, [h, newPosition])
+				no_explorado.sort()
 
-			### ACA
-			self.explorado.append(h_th[1])
+		# Explorar los nodos adyacentes y expandir cada uno
+		while len(no_explorado) > 0:
+			h_th = no_explorado.pop(0)
+			print(h_th)
+			
+			## ASTART EXPLORE
+			explorado.append(h_th[1])
 			movimientos = self.mov_seguros(h_th[1])
 
 			for mov in movimientos:
@@ -349,59 +356,61 @@ class Sneikii():
 				head[1] += mov[1]
 				h = ((self.food[0] - head[0])**2 + (self.food[1] - head[1])**2)**0.5
 
-				if str(head) not in self.padres.keys():
-					self.padres[str(head)] = h_th[1]
+				if str(head) not in padres.keys():
+					padres[str(head)] = h_th[1]
 
-				if head in self.explorado:
+				if head in explorado:
 					continue
 
 				if self.food[0] == head[0] and self.food[1] == head[1]:
-					self.comida_encontrada = True
+					comida_encontrada = True
 					break
 					#return 
 
-				if [h, head] not in self.no_explorado:
-					self.no_explorado.insert(0, [h, head])
-					self.no_explorado.sort()
-			
-			if self.comida_encontrada:
+				if [h, head] not in no_explorado:
+					no_explorado.insert(0, [h, head])
+					no_explorado.sort()
+			## END
+
+			if comida_encontrada:
 				break
 
-		if self.comida_encontrada: # backtrack para moverse
+		print()
+		if comida_encontrada: # backtrack para moverse
 			loc = self.food
-			while self.padres[str(loc)] != orig_head:
-				loc = self.padres[str(loc)]
-			return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+			while padres[str(loc)] != self.head:
+				loc = padres[str(loc)]
+			return [loc[0] - self.head[0], loc[1] - self.head[1]]
 
-		elif len(self.explorado) > 0: 
-			loc = self.explorado[-1] # ultimo punto
-			while self.padres[str(loc)] != orig_head:
-				loc = self.padres[str(loc)]
-			return [loc[0] - orig_head[0], loc[1] - orig_head[1]]
+		elif len(explorado) > 0: 
+			loc = explorado[-1] # ultimo punto
+			while padres[str(loc)] != self.head:
+				loc = padres[str(loc)]
+			return [loc[0] - self.head[0], loc[1] - self.head[1]]
 
 		else: # no hay camino para comida, no hay camino para el punto lejano
 			return self.deslizarse() #mov_seguro() # rand.opciones([[1, 0], [-1, 0], [0, 1], [0, -1]])
-
-
-	
-
 
 # # # JUEGO # # #
 game = Sneikii()
 while game.gaming:
 	#print(game)
-	os.system('cls' if os.name == 'nt' else 'clear') # Limpiar consola
-	for i in game.board:
-		print(i)
+	#os.system('cls' if os.name == 'nt' else 'clear') # Limpiar consola
+	print(print())
+	for i in range(game.width):
+		print(" ",i%10,sep="", end="")
+	print()
+	for idx, i in enumerate(game.board):
+		print(idx%10,i)
 	print("score:",game.score)
 
 	### Mover Manualmente
-	rawInput = input("enter: ")
+	rawInput = input("input: ")
 	#print(rawInput)
 	#direccion = game.processInput(rawInput)
 	#direccion = game.aStar()
 	direccion = game.busqueda_A_star()
-	print(direccion)
+	print("direccion",direccion)
 
 	game.updateDirection(direccion)
 	game.updateState()
