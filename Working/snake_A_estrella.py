@@ -1,5 +1,4 @@
 from snake_GUI import SnakeGameGUI
-import pygame
 import random
 import numpy as np
 

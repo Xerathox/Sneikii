@@ -1,7 +1,7 @@
-from snake_clase import SnakeGame
 import pygame
 import time
 import random
+from snake_clase import SnakeGame
 
 rand = random.Random()
 
