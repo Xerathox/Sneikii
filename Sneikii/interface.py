@@ -12,6 +12,9 @@ class Game():
 		# Iniciamos el tablero
 		self.gameBoard = Board(height,width)
 
+		# Definimos la velocidad como fps
+		self.fps = 40
+
 		# Definimos los colores
 		self.light_green = (125, 255, 125)
 		self.green = (0, 143, 57)
@@ -53,21 +56,12 @@ class Game():
 		pygame.display.update()
 
 	def runGame(self, ai=True):
-		actualizar_rate = 1
-		fps = 40
-		contador = 0
-		distancia = self.gameBoard.direction
-		pygame.init()
 		myFont = pygame.font.SysFont("monospace", 65)
-		self.drawBoard()
-
-		pygame.display.update()
-		exitPressed = False
 		
 		# Loop principal del juego
+		exitPressed = False
 		while exitPressed == False and self.gameBoard.gaming == True:
-
-			# Input del usuario
+			# Input del usuario con las teclas
 			move = self.gameBoard.direction
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
@@ -82,26 +76,29 @@ class Game():
 					elif event.key == pygame.K_RIGHT:
 						move = [0, 1]
 
-			time.sleep(1.0/fps)
-			contador += 1
-			if contador >= actualizar_rate:
-				if ai:
-					move = self.gameBoard.aStar() or self.gameBoard.revAStar()
-				self.gameBoard.updateDirection(move)
-				self.gameBoard.updateState()
+			# Controlar la velocidad del juego
+			time.sleep(1.0/self.fps)
 
-				contador = 0
+			# Comprueba si la inteligencia artificial esta activada o no
+			if ai:
+				move = self.gameBoard.aStar() or self.gameBoard.revAStar()
+			self.gameBoard.updateDirection(move)
+			self.gameBoard.updateState()
+
+			# Dibujar el tablero
 			self.drawBoard()
 			pygame.display.update()
 				
-		# --- perdimos el juego ---
+		# Game Over
 		label = myFont.render(f"Game Over!", 1, self.red)
-		self.screen.blit(label, (self.width + 10, 50))
+		self.screen.blit(label, (self.width -420,630))
 		pygame.display.update()
 		while exitPressed == False:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					exitPressed = True 
+					exitPressed = True
+
+		# Cerrar PyGame 
 		pygame.quit()
 
 
