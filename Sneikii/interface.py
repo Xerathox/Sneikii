@@ -12,6 +12,7 @@ class Game():
 		# Iniciamos el tablero
 		self.gameBoard = Board(height,width)
 
+		# Definimos los colores
 		self.light_green = (125, 255, 125)
 		self.green = (0, 143, 57)
 		self.black = (0, 0, 0)
@@ -31,7 +32,7 @@ class Game():
 		self.screen.fill(self.black)
 		for i in range(self.gameBoard.height):
 			for j in range(self.gameBoard.width):
-				# check for head, body, food
+				# Revisar los tipos de casillero que hay
 				if self.gameBoard.board[i, j] == 1:
 					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
 					pygame.draw.rect(self.screen, self.light_green, tam_loc)
