@@ -17,7 +17,7 @@ class Game():
 		self.black = (0, 0, 0)
 		self.red = (255, 0, 0)
 		self.yellow = (255,255,0)
-		self.sizeSquared = 10
+		self.sizeSquared = 20
 		self.height = self.sizeSquared * self.gameBoard.height
 		self.width = self.sizeSquared * self.gameBoard.width
 		self.size = (self.width + 400, self.height)
@@ -32,17 +32,17 @@ class Game():
 			for j in range(self.gameBoard.width):
 				# check for head, body, food
 				if self.gameBoard.board[i, j] == 1:
-					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.blue, tam_loc)
+					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.blue, temp)
 				elif self.gameBoard.board[i, j] == 2:
-					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.purple, tam_loc)
+					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.purple, temp)
 				elif self.gameBoard.board[i, j] == 3:
-					loc = (int((j+0.5)*self.sizeSquared), int((i+0.5)*self.sizeSquared))
-					pygame.draw.circle(self.screen, self.red, loc, self.sizeSquared//2)
+					temp = (int((j+0.5)*self.sizeSquared), int((i+0.5)*self.sizeSquared))
+					pygame.draw.circle(self.screen, self.red, temp, self.sizeSquared//2)
 				elif self.gameBoard.board[i, j] == 4:
-					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.yellow, tam_loc)
+					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.yellow, temp)
 		
 		label = myFont.render(f"Score: {self.gameBoard.score}", 1, self.purple)
 		self.screen.blit(label, (self.width + 10,10))
@@ -51,10 +51,7 @@ class Game():
 		pygame.display.update()
 
 	def runGame(self, ai=True):
-		actualizar_rate = 1
 		fps = 40
-		contador = 0
-		distancia = self.gameBoard.direction
 		pygame.init()
 		myFont = pygame.font.SysFont("monospace", 65)
 		self.drawBoard()
@@ -72,23 +69,24 @@ class Game():
 					exitPressed = True
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_UP:
-						move = [-1, 0]
+						move = [-1, 0]			
 					elif event.key == pygame.K_DOWN:
 						move = [1, 0]
 					elif event.key == pygame.K_LEFT:
 						move = [0, -1]
 					elif event.key == pygame.K_RIGHT:
 						move = [0, 1]
+			
+			# Si la IA esta activada
+			if ai:
+				move = self.gameBoard.aStar() or self.gameBoard.revAStar()
 
+			# Controlar la rapidez
 			time.sleep(1.0/fps)
-			contador += 1
-			if contador >= actualizar_rate:
-				if ai:
-					move = self.gameBoard.aStar() or self.gameBoard.revAStar()
-				self.gameBoard.updateDirection(move)
-				self.gameBoard.updateState()
 
-				contador = 0
+			# Procesar el movimiento
+			self.gameBoard.updateDirection(move)
+			self.gameBoard.updateState()	
 			self.drawBoard()
 			pygame.display.update()
 				
