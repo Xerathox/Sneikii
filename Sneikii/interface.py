@@ -12,15 +12,16 @@ class Game():
 		# Iniciamos el tablero
 		self.gameBoard = Board(height,width)
 
-		self.blue = (0, 0, 255)
-		self.purple = (255, 0, 255)
+		self.light_green = (125, 255, 125)
+		self.green = (0, 143, 57)
 		self.black = (0, 0, 0)
 		self.red = (255, 0, 0)
-		self.yellow = (255,255,0)
+		self.yellow = (255,246,143)
 		self.sizeSquared = 20
+		self.white = (255,255,255)
 		self.height = self.sizeSquared * self.gameBoard.height
 		self.width = self.sizeSquared * self.gameBoard.width
-		self.size = (self.width + 400, self.height)
+		self.size = (self.width, self.height+100)
 
 		self.screen = pygame.display.set_mode(self.size)
 		pygame.init()
@@ -32,26 +33,29 @@ class Game():
 			for j in range(self.gameBoard.width):
 				# check for head, body, food
 				if self.gameBoard.board[i, j] == 1:
-					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.blue, temp)
+					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.light_green, tam_loc)
 				elif self.gameBoard.board[i, j] == 2:
-					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.purple, temp)
+					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.green, tam_loc)
 				elif self.gameBoard.board[i, j] == 3:
-					temp = (int((j+0.5)*self.sizeSquared), int((i+0.5)*self.sizeSquared))
-					pygame.draw.circle(self.screen, self.red, temp, self.sizeSquared//2)
+					loc = (int((j+0.5)*self.sizeSquared), int((i+0.5)*self.sizeSquared))
+					pygame.draw.circle(self.screen, self.red, loc, self.sizeSquared//2)
 				elif self.gameBoard.board[i, j] == 4:
-					temp = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
-					pygame.draw.rect(self.screen, self.yellow, temp)
+					tam_loc = (j*self.sizeSquared, i*self.sizeSquared, self.sizeSquared, self.sizeSquared)
+					pygame.draw.rect(self.screen, self.yellow, tam_loc)
 		
-		label = myFont.render(f"Score: {self.gameBoard.score}", 1, self.purple)
-		self.screen.blit(label, (self.width + 10,10))
+		label = myFont.render(f"Score: {self.gameBoard.score}", 1, self.white)
+		self.screen.blit(label, (self.width -420,630))
 		tam_loc = (self.width, 0, 3, self.height)
 		pygame.draw.rect(self.screen, (255, 255, 255), tam_loc)
 		pygame.display.update()
 
 	def runGame(self, ai=True):
+		actualizar_rate = 1
 		fps = 40
+		contador = 0
+		distancia = self.gameBoard.direction
 		pygame.init()
 		myFont = pygame.font.SysFont("monospace", 65)
 		self.drawBoard()
@@ -69,24 +73,23 @@ class Game():
 					exitPressed = True
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_UP:
-						move = [-1, 0]			
+						move = [-1, 0]
 					elif event.key == pygame.K_DOWN:
 						move = [1, 0]
 					elif event.key == pygame.K_LEFT:
 						move = [0, -1]
 					elif event.key == pygame.K_RIGHT:
 						move = [0, 1]
-			
-			# Si la IA esta activada
-			if ai:
-				move = self.gameBoard.aStar() or self.gameBoard.revAStar()
 
-			# Controlar la rapidez
 			time.sleep(1.0/fps)
+			contador += 1
+			if contador >= actualizar_rate:
+				if ai:
+					move = self.gameBoard.aStar() or self.gameBoard.revAStar()
+				self.gameBoard.updateDirection(move)
+				self.gameBoard.updateState()
 
-			# Procesar el movimiento
-			self.gameBoard.updateDirection(move)
-			self.gameBoard.updateState()	
+				contador = 0
 			self.drawBoard()
 			pygame.display.update()
 				
@@ -99,7 +102,6 @@ class Game():
 				if event.type == pygame.QUIT:
 					exitPressed = True 
 		pygame.quit()
-
 
 
 # Probando el juego
