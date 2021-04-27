@@ -149,22 +149,18 @@ class Board():
 		path = path[::-1] # Se invierte el camino porque se necesita mostrar de comienzo a final
 
 		# El valor con el que se marcara el camino
-		mark = 4
-		for i in range(self.height): # Se limpia cualquier camino que se haya trazado anteriormente
-			for j in range(self.width):
-				if self.board[i][j] == 4:
-					self.board[i][j] = 0
+		# Se limpia cualquier camino que se haya trazado anteriormente
+		self.board = np.array([[self.board[i][j] if self.board[i][j] != 4 else 0 for j in range(self.width)] for i in range(self.height)])
 		
 		# Marcamos el camino en el tablero
+		mark = 4
+		#self.board = np.array([[self.board[i][j] if ([i,j] not in path[1:len(path)-1]) else mark for j in range(self.width)] for i in range(self.height)])
 		for i in range(1,len(path)-1): # Imprimimos todo el camino excepto el primer y ultimo valor que representa inicio y final
 			self.board[path[i][0]][path[i][1]] = mark
-			pass
 		
 		# Devolvemos la direccion del primer paso
 		if len(path)>1:
-			for direction in self.directions:
-				if self.head[0]+direction[0]==path[1][0] and self.head[1]+direction[1]==path[1][1]:
-					return direction
+			return [path[1][0]-self.head[0],path[1][1]-self.head[1]]
 		else:
 			self.gaming = False
 			return [0,0]
@@ -268,6 +264,7 @@ class Board():
 		temp, near = 0, None
 		for i in range(len(blanks)):
 			heuristic = ((blanks[i][0]-self.food[0])**2+(blanks[i][1]-self.food[1])**2)**0.5
+			#heuristic = ((blanks[i][0]-self.head[0])**2+(blanks[i][1]-self.head[1])**2)**0.5#
 			if heuristic > temp:
 				temp = heuristic
 				near = blanks[i].copy()
